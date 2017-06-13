@@ -1,3 +1,4 @@
-# This file will be read by resetprop
+# If installed in Magisk, this file will be read by resetprop
+# If installed in System, the props will be put in a script or directly in build.prop
 # Example: Change dpi
 # ro.sf.lcd_density=320

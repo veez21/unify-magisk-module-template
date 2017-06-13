@@ -21,7 +21,7 @@
 # 5. For changing props, add your additional/modified props into common/system.prop
 # 
 ##########################################################################################
-
+custom_template_version="0.2"
 ##########################################################################################
 # Defines
 ##########################################################################################
@@ -35,23 +35,23 @@ MODID=template
 # Set to true if you need to enable Magic Mount
 # Most mods would like it to be enabled
 # ** When system install is used, this will also be used 
-#    as a flag is if system modding will be done.
+#    as a flag if system modding will be done.
 AUTOMOUNT=true
 
 # Set to true if you need to load system.prop
 # ** When system install is used, the props in
-#    system.prop will be put directly to /system/build.prop
+#    system.prop will be put to a script or directly to /system/build.prop (more info below)
 PROPFILE=false
 
 # Set to true if you need post-fs-data script
 # ** When system install is used, the scripts will
-#    go to /su/su.d, /system/su.d (if SuperSU is installed
+#    go to /su/su.d, /system/su.d (if SuperSU is installed)
 #    or /system/etc/init.d
 POSTFSDATA=false
 
 # Set to true if you need late_start service script
 # ** When system install is used, the scripts will
-#    go to /su/su.d, /system/su.d (if SuperSU is installed
+#    go to /su/su.d, /system/su.d (if SuperSU is installed)
 #    or /system/etc/init.d
 LATESTARTSERVICE=false
 
@@ -96,21 +96,28 @@ REPLACE="
 # Install Configuration
 ##########################################################################################
 
-# You can tweak your installation process by putting Variables in /dev/.config
-# Valid Variables:
-#   MAGISKINSTALL - forces magisk installation (might conflict with SYSTEMINSTALL) (values: true or false)
-#   SYSTEMINSTALL - forces system installation (might conflict with MAGISKINSTALL) (values: true or false)
-#   INITPATH - sets path to install scripts (post-fs-data.sh, service.sh) if system install (values: directories)
-#   BUILDPROP - sets properties from system.prop directly to build.prop (values: true or false)
-#   PERMANENTDELETE - PERMANENTLY delete folders in $REPLACE (values: true or false)
-# Editing here directly is also valid, but will be overwritten in /dev/.config
+# You can tweak your installation process by putting Overridable variables (shell) below or in /dev/.config
+#   #variables (shell)    #values         #description
+#
+#   MAGISKINSTALL        true/false     - forces magisk installation (might conflict with SYSTEMINSTALL)
+#   SYSTEMINSTALL        true/false     - forces system installation (might conflict with MAGISKINSTALL)
+#   INITPATH             directories    - sets path to install scripts if system install
+#                                         applies to: post-fs-data.sh, service.sh, prop script
+#   BUILDPROP            true/false     - sets properties from system.prop directly to build.prop
+#   PERMANENTDELETE      true/false     - PERMANENTLY delete folders in $REPLACE
+#   ERROREXIT            true/false     - exits with an error on every failed attempt to install to Magisk (enabled by default)
+#                                         if disabled, the installer will proceed with installing to /system (if possible)
+
+# The configuration here will be overwritten in /dev/.config
 # Leave it blank if you don't need it.
 # MAGISKINSTALL is enabled by default to prioritize Magisk.
+# To enable auto-detection of installation, leave MAGISKINSTALL and SYSTEMINSTALL blank and ERROREXIT to false.
 MAGISKINSTALL=true
 SYSTEMINSTALL=
 INITPATH=
 BUILDPROP=
 PERMANENTDELETE=
+ERROREXIT=
 
 ##########################################################################################
 # Permissions

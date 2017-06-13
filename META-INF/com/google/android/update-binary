@@ -163,12 +163,13 @@ install_system() {
 	
 	# Replace/Remove folders
 	if [ -n $REPLACE ]; then
-	  ui_print "- Removing files"
 	  [ "$PERMANENTDELETE" == false ] && {
+		ui_print "- Removing (with backup) files"
         for TARGET in $REPLACE; do
           mv $TARGET $TARGET.bak
         done
 	  } || {
+		ui_print "- Removing (permanently) files"
         for TARGET in $REPLACE; do
           rm -rf $TARGET
         done
@@ -185,7 +186,7 @@ install_system() {
 	if [ -z $BUILDPROP ]; then
 	  if [ -n $INITPATH ]; then
 	    if $PROPFILE; then
-	      ui_print "- Setting property scripts"
+	      ui_print "- Setting property script (${MODID}-prop.sh)"
 	      echo "#!/system/bin/sh" > $INITPATH/${MODID}-prop.sh
 		  echo "" >> $INITPATH/${MODID}-prop.sh
 	      for i in $(grep "[a-zA-Z0-9]=[a-zA-Z0-9]" $INSTALLER/common/system.prop | sed 's/ /_/g'); do
@@ -205,22 +206,22 @@ install_system() {
 	fi
 	
 	# post-fs-data script to $INITPATH
-	# post-fs-data and latestartservice scripts might be executed almost
+	# post-fs-data and late_start service scripts might be executed almost
 	# at the same time.
 	[ -n $INITPATH ] && {
 	  if $POSTFSDATA; then
-	    ui_print "- Copying post-fs-data script to $INITPATH"
+	    ui_print "- Copying post-fs-data script (${MODID-1}.sh) to $INITPATH"
 	    cp -af $INSTALLER/common/post-fs-data.sh $INITPATH/${MODID}-1.sh
 	    set_perm $INITPATH/${MODID}-1.sh 0 0 0700
 	  fi
 	} || ui_print "! No proper directory to put scripts (post-fs-data)"
 	
-	# latestartservice script to $INITPATH
-	# post-fs-data and latestartservice scripts might be executed almost
+	# late_start service script to $INITPATH
+	# post-fs-data and late_start service scripts might be executed almost
 	# at the same time.
 	[ -n $INITPATH ] && {
 	  if $LATESTARTSERVICE; then
-	    ui_print "- Copying latestartservice script to $INITPATH"
+	    ui_print "- Copying late_start service script (${MODID}-2.sh) to $INITPATH"
 	    cp -af $INSTALLER/common/service.sh $INITPATH/${MODID}-2.sh
 	    set_perm $INITPATH/${MODID}-2.sh 0 0 0700
 	  fi
@@ -293,9 +294,11 @@ if [ ! -f "config.sh" ]; then
 fi
 
 source config.sh
+# Get install config
 [ -f /dev/.config ] && {
   chmod 755 /dev/.config
   source /dev/.config
+  rm /dev/.config
 }
 
 INSTALLER=$TMPDIR/$MODID
@@ -305,6 +308,7 @@ mkdir -p $INSTALLER
 cd $INSTALLER
 unzip -o "$ZIP" "common/*" module.prop
 
+# Fix variable conflicts/errors
 [ -z $SYSTEMINSTALL ] && [ -z $MAGISKINSTALL ] && {
   MAGISKINSTALL=false
   SYSTEMINSTALL=false
@@ -329,9 +333,10 @@ if [ $SYSTEMINSTALL ] && [ -z $MAGISKINSTALL ] && $SYSTEMINSTALL; then
   SYSTEMINSTALL=true
 fi
 
-$MAGISKINSTALL && SYSTEMINSTALL=false
-$SYSTEMINSTALL && MAGISKINSTALL=false
+$MAGISKINSTALL && SYSTEMINSTALL=false && PERM=ro
+$SYSTEMINSTALL && MAGISKINSTALL=false && PERM=rw
 [ ! $PERM ] && PERM=rw
+[ ! $ERROREXIT ] && ERROREXIT=true
 
 ##########################################################################################
 # Main
@@ -341,14 +346,18 @@ $SYSTEMINSTALL && MAGISKINSTALL=false
 print_modname
 
 # Please leave this message in your flashable zip for credits :)
+ui_print "******************************"
+ui_print "System/Less Install  (@veez21)"
 if $MAGISKINSTALL; then
   ui_print "******************************"
   ui_print "Powered by Magisk (@topjohnwu)"
-  ui_print "******************************"
-else
-  ui_print "******************************"
-  ui_print "System/Less Install  (@veez21)"
-  ui_print "******************************"
+fi
+ui_print "******************************"
+
+if ($MAGISKINSTALL) && (! $SYSTEMINSTALL); then
+  ui_print "- Magisk/Systemless Install"
+elif ($SYSTEMINSTALL) && (! $MAGISKINSTALL); then
+  ui_print "- System Install"
 fi
 
 ui_print "- Mounting /system($PERM), /vendor($PERM), /data, /cache"
@@ -386,21 +395,24 @@ if is_mounted /data; then
   IMG=/data/$IMGNAME
   if [ ! -f "/data/magisk.img" ]; then
     ui_print "! Magisk is not installed!"
-	ui_print "- Resorting to System Install"
-	install_system
-	exit $?
+	if ! $ERROREXIT; then
+	  ui_print "- Resorting to System Install"
+	  mount -o rw /system 2>/dev/null
+	  mount -o rw /vendor 2>/dev/null
+	  install_system
+	fi
+	exit 1
   fi
 else
   IMG=/cache/magisk.img
-  ui_print " "
-  ui_print "***********************************"
-  ui_print "*      !! Data unavailible !!     *"
-  ui_print "* Magisk detection is impossible  *"
-  ui_print "* Installation will still proceed *"
-  ui_print "*  But please make sure you have  *"
-  ui_print "*        Magisk installed!!       *"
-  ui_print "***********************************"
-  ui_print " "
+  ui_print "! Data unavailable"
+  if ! $ERROREXIT; then
+    ui_print "- Resorting to System Install"
+    mount -o rw /system 2>/dev/null
+    mount -o rw /vendor 2>/dev/null
+    install_system
+  fi
+  exit 1
 fi
 
 request_size_check "$ZIP"
