@@ -21,7 +21,7 @@
 # 5. For changing props, add your additional/modified props into common/system.prop
 # 
 ##########################################################################################
-custom_template_version="0.2"
+custom_template_version="0.2.1"
 ##########################################################################################
 # Defines
 ##########################################################################################
@@ -54,6 +54,13 @@ POSTFSDATA=false
 #    go to /su/su.d, /system/su.d (if SuperSU is installed)
 #    or /system/etc/init.d
 LATESTARTSERVICE=false
+
+# The minimum and maximum APIs that will be used by the module
+# ** Do not make MINAPI greater than MAXAPI or the other way around!
+#    Make MINAPI & MAXAPI equal if you want it soecific to only one Android version
+#    Leave blank to disable detection
+MINAPI=
+MAXAPI=
 
 ##########################################################################################
 # Installation Message

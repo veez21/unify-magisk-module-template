@@ -386,6 +386,30 @@ if [ "$ABILONG" = "x86_64" ]; then ARCH=x64; IS64BIT=true; fi;
 # You can get the Android API version from $API, the CPU architecture from $ARCH
 # Useful if you are creating Android version / platform dependent mods
 
+# Get $MINAPI and $MAXAPI
+if [ $MINAPI ] || [ $MAXAPI ]; then
+  if [ $MAXAPI ] && [ $MINAPI ]; then
+    if [ "$MAXAPI" -eq "$MINAPI" ]; then
+	  if [ "$API" -ne "$MAXAPI" -o "$API" -ne "$MINAPI" ]; then
+	    ui_print "! This module is only for API $MAXAPI"
+		exit 1
+	  fi
+	elif [ "$MAXAPI" -le "$API" ]; then
+	  ui_print "! This module has a maximum API of $MAXAPI"
+	  exit 1
+	elif [ "$MINAPI" -gt "$API" ]; then
+	  ui_print "! This module has a minimum API of $MINAPI"
+	  exit 1
+	fi
+  elif [ ! $MAXAPI ] && [ "$MINAPI" -gt "$API" ]; then
+    ui_print "! This module has a minimum API of $MINAPI"
+	exit 1
+  elif [ $MAXAPI ] && [ "$MAXAPI" -le "$API" ]; then
+    ui_print "! This module has a maximum API of $MAXAPI"
+	exit 1
+  fi
+fi
+
 if $SYSTEMINSTALL; then
   install_system
   exit $?
