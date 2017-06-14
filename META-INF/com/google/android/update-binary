@@ -183,9 +183,9 @@ install_system() {
 	fi
 	
 	# Set properties
-	if [ -z $BUILDPROP ]; then
-	  if [ -n $INITPATH ]; then
-	    if $PROPFILE; then
+	if $PROPFILE; then
+	  if [ -z $BUILDPROP ]; then
+	    if [ -n $INITPATH ]; then
 	      ui_print "- Setting property script (${MODID}-prop.sh)"
 	      echo "#!/system/bin/sh" > $INITPATH/${MODID}-prop.sh
 		  echo "" >> $INITPATH/${MODID}-prop.sh
@@ -194,15 +194,15 @@ install_system() {
           done
 	      echo "" >> $INITPATH/${MODID}-prop.sh
 	      set_perm $INITPATH/${MODID}-prop.sh 0 0 0700 
+	    else  
+	      ui_print "! No proper directory to put scripts (prop)"
 	    fi
-	  else  
-	    ui_print "! No proper directory to put scripts (prop)"
+	  elif $BUILDPROP; then
+	    ui_print "- Setting properties directly in /system/build.prop"
+	    for i in $(grep "[a-zA-Z0-9]=[a-zA-Z0-9]" $INSTALLER/common/system.prop | sed 's/ /_/g'); do
+	      [[ $(echo $i | grep "#_") ]] || set_file_prop "${i%%=*}" "${i#*=}" /system/build.prop
+        done	  
 	  fi
-	elif $BUILDPROP; then
-	  ui_print "- Setting properties directly in /system/build.prop"
-	  for i in $(grep "[a-zA-Z0-9]=[a-zA-Z0-9]" $INSTALLER/common/system.prop | sed 's/ /_/g'); do
-	    [[ $(echo $i | grep "#_") ]] || set_file_prop "${i%%=*}" "${i#*=}" /system/build.prop
-      done	  
 	fi
 	
 	# post-fs-data script to $INITPATH
