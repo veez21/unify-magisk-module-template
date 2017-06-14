@@ -21,7 +21,7 @@
 # 5. For changing props, add your additional/modified props into common/system.prop
 # 
 ##########################################################################################
-custom_template_version="0.2.1"
+custom_template_version="0.3"
 ##########################################################################################
 # Defines
 ##########################################################################################
@@ -59,7 +59,7 @@ LATESTARTSERVICE=false
 # ** Do not make MINAPI greater than MAXAPI or the other way around!
 #    Make MINAPI & MAXAPI equal if you want it soecific to only one Android version
 #    Leave blank to disable detection
-MINAPI=
+MINAPI=21
 MAXAPI=
 
 ##########################################################################################
@@ -104,16 +104,16 @@ REPLACE="
 ##########################################################################################
 
 # You can tweak your installation process by putting Overridable variables (shell) below or in /dev/.config
-#   #variables (shell)    #values         #description
+#   #variables (shell)    #type       #values          #description
 #
-#   MAGISKINSTALL        true/false     - forces magisk installation (might conflict with SYSTEMINSTALL)
-#   SYSTEMINSTALL        true/false     - forces system installation (might conflict with MAGISKINSTALL)
-#   INITPATH             directories    - sets path to install scripts if system install
-#                                         applies to: post-fs-data.sh, service.sh, prop script
-#   BUILDPROP            true/false     - sets properties from system.prop directly to build.prop
-#   PERMANENTDELETE      true/false     - PERMANENTLY delete folders in $REPLACE
-#   ERROREXIT            true/false     - exits with an error on every failed attempt to install to Magisk (enabled by default)
-#                                         if disabled, the installer will proceed with installing to /system (if possible)
+#   MAGISKINSTALL         magisk      true/false     - forces magisk installation (might conflict with SYSTEMINSTALL)
+#   SYSTEMINSTALL         system      true/false     - forces system installation (might conflict with MAGISKINSTALL)
+#   INITPATH              system      directories    - sets path to install scripts if system install
+#                                                      applies to: post-fs-data.sh, service.sh, prop script
+#   BUILDPROP             system      true/false     - sets properties from system.prop directly to build.prop
+#   PERMANENTDELETE       system      true/false     - PERMANENTLY delete folders in $REPLACE
+#   ERROREXIT          magisk/system  true/false     - exits with an error on every failed attempt to install to Magisk (enabled by default)
+#                                                      if disabled, the installer will proceed with installing to /system (if possible)
 
 # The configuration here will be overwritten in /dev/.config
 # Leave it blank if you don't need it.

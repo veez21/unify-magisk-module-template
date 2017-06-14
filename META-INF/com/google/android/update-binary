@@ -179,6 +179,7 @@ install_system() {
 	# Copy files in system folder to /system
 	if $AUTOMOUNT; then
 	  ui_print "- Copying files to /system"
+	  rm $INSTALLER/system/placeholder 2>/dev/null
 	  cp -af system/* /system
 	fi
 	
