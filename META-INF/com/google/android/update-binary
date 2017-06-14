@@ -153,6 +153,9 @@ detect_initpath() {
 install_system() {
   # Detect path for scripts (see detect_initpath function)
   detect_initpath
+  if $ERROREXIT; then
+    [ ! -d $INITPATH ] && ui_print "! $INITPATH doesn't exist" && exit 1
+  fi
   
   # Unzip files
   cd $INSTALLER
@@ -180,7 +183,7 @@ install_system() {
 	if $AUTOMOUNT; then
 	  ui_print "- Copying files to /system"
 	  rm $INSTALLER/system/placeholder 2>/dev/null
-	  cp -af system/* /system
+	  cp -af $INSTALLER/system/* /system
 	fi
 	
 	# Set properties
