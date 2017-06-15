@@ -212,24 +212,28 @@ install_system() {
 	# post-fs-data script to $INITPATH
 	# post-fs-data and late_start service scripts might be executed almost
 	# at the same time.
-	[ -n $INITPATH ] && {
+	if [ -n $INITPATH ]; then
 	  if $POSTFSDATA; then
 	    ui_print "- Copying post-fs-data script (${MODID-1}.sh) to $INITPATH"
 	    cp -af $INSTALLER/common/post-fs-data.sh $INITPATH/${MODID}-1.sh
 	    set_perm $INITPATH/${MODID}-1.sh 0 0 0700
 	  fi
-	} || ui_print "! No proper directory to put scripts (post-fs-data)"
+	else
+	  ui_print "! No proper directory to put scripts (post-fs-data)"
+	fi
 	
 	# late_start service script to $INITPATH
 	# post-fs-data and late_start service scripts might be executed almost
 	# at the same time.
-	[ -n $INITPATH ] && {
+	if [ -n $INITPATH ]; then
 	  if $LATESTARTSERVICE; then
 	    ui_print "- Copying late_start service script (${MODID}-2.sh) to $INITPATH"
 	    cp -af $INSTALLER/common/service.sh $INITPATH/${MODID}-2.sh
 	    set_perm $INITPATH/${MODID}-2.sh 0 0 0700
 	  fi
-	} || ui_print "! No proper directory to put scripts (service)"
+	else
+	  ui_print "! No proper directory to put scripts (service)"
+	fi
 	
 	# Set permissions
 	ui_print "- Setting permissions"
@@ -352,16 +356,12 @@ print_modname
 # Please leave this message in your flashable zip for credits :)
 ui_print "******************************"
 ui_print "System/Less Install  (@veez21)"
-if $MAGISKINSTALL; then
-  ui_print "******************************"
-  ui_print "Powered by Magisk (@topjohnwu)"
-fi
 ui_print "******************************"
 
 if ($MAGISKINSTALL) && (! $SYSTEMINSTALL); then
-  ui_print "- Magisk/Systemless Install"
+  ui_print " - Magisk/Systemless Install"
 elif ($SYSTEMINSTALL) && (! $MAGISKINSTALL); then
-  ui_print "- System Install"
+  ui_print " - System Install"
 fi
 
 ui_print "- Mounting /system($PERM), /vendor($PERM), /data, /cache"
@@ -398,7 +398,7 @@ if [ $MINAPI ] || [ $MAXAPI ]; then
 	    ui_print "! This module is only for API $MAXAPI"
 		exit 1
 	  fi
-	elif [ "$MAXAPI" -le "$API" ]; then
+	elif [ "$MAXAPI" -lt "$API" ]; then
 	  ui_print "! This module has a maximum API of $MAXAPI"
 	  exit 1
 	elif [ "$MINAPI" -gt "$API" ]; then
@@ -408,7 +408,7 @@ if [ $MINAPI ] || [ $MAXAPI ]; then
   elif [ ! $MAXAPI ] && [ "$MINAPI" -gt "$API" ]; then
     ui_print "! This module has a minimum API of $MINAPI"
 	exit 1
-  elif [ $MAXAPI ] && [ "$MAXAPI" -le "$API" ]; then
+  elif [ $MAXAPI ] && [ "$MAXAPI" -lt "$API" ]; then
     ui_print "! This module has a maximum API of $MAXAPI"
 	exit 1
   fi
@@ -461,7 +461,13 @@ fi
 
 mount_image $IMG $MOUNTPATH
 if ! is_mounted $MOUNTPATH; then
-  ui_print "! $IMG mount failed... abort"
+  ui_print "! $IMG mount failed..."
+  if ! $ERROREXIT; then
+    ui_print "- Resorting to System Install"
+    mount -o rw /system 2>/dev/null
+    mount -o rw /vendor 2>/dev/null
+    install_system
+  fi
   exit 1
 fi
 
@@ -529,4 +535,9 @@ if ! $BOOTMODE; then
 fi
 
 ui_print "- Done"
+if $MAGISKINSTALL; then
+  ui_print "******************************"
+  ui_print "Powered by Magisk (@topjohnwu)"
+  ui_print "******************************"
+fi
 exit 0
