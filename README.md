@@ -13,3 +13,7 @@ Its purpose is to make Magisk Modules install in either Magisk (as a module) or 
 
 You can make a module from this template almost the same as you can make one in the Original template.
 It should be easy to transition from there to here.
+
+### Tips for developers
+ - To automate the detection (system/less), set SYSTEMINSTALL and MAGISKINSTALL to blank and ERROREXIT to false
+ - To make a module android version specific, set MINAPI and MAXAPI with the same SDK

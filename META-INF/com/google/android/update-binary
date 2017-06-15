@@ -398,7 +398,7 @@ if [ $MINAPI ] || [ $MAXAPI ]; then
 	    ui_print "! This module is only for API $MAXAPI"
 		exit 1
 	  fi
-	elif [ "$MAXAPI" -le "$API" ]; then
+	elif [ "$MAXAPI" -lt "$API" ]; then
 	  ui_print "! This module has a maximum API of $MAXAPI"
 	  exit 1
 	elif [ "$MINAPI" -gt "$API" ]; then
@@ -408,7 +408,7 @@ if [ $MINAPI ] || [ $MAXAPI ]; then
   elif [ ! $MAXAPI ] && [ "$MINAPI" -gt "$API" ]; then
     ui_print "! This module has a minimum API of $MINAPI"
 	exit 1
-  elif [ $MAXAPI ] && [ "$MAXAPI" -le "$API" ]; then
+  elif [ $MAXAPI ] && [ "$MAXAPI" -lt "$API" ]; then
     ui_print "! This module has a maximum API of $MAXAPI"
 	exit 1
   fi
