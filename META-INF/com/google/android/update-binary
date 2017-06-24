@@ -173,7 +173,7 @@ install_system() {
 	echo "# $MODID System Install" > $INSTALLEDFILESINFO
 	
 	# Replace/Remove folders
-	if [ -n $REPLACE ]; then
+	if [ $REPLACE ]; then
 	  [ "$PERMANENTDELETE" == false ] && {
 		ui_print "- Removing (with backup) files"
         for TARGET in $REPLACE; do
@@ -361,6 +361,7 @@ fi
 $MAGISKINSTALL && SYSTEMINSTALL=false && PERM=ro
 $SYSTEMINSTALL && MAGISKINSTALL=false && PERM=rw
 [ ! $PERM ] && PERM=rw
+[ ! $PERMANENTDELETE ] && PERMANENTDELETE=false
 [ ! $ERROREXIT ] && ERROREXIT=true
 
 ##########################################################################################
