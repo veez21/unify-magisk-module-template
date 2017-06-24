@@ -153,6 +153,10 @@ detect_initpath() {
 install_system() {
   # All files installed in System will be listed in this file
   INSTALLEDFILESINFO=/cache/system.install
+  
+  log_installed() {
+    echo "${3}${1#*"$2"}${4}" >> $INSTALLEDFILESINFO
+  }
 
   # Detect path for scripts (see detect_initpath function)
   detect_initpath
@@ -174,14 +178,14 @@ install_system() {
 		ui_print "- Removing (with backup) files"
         for TARGET in $REPLACE; do
           mv $TARGET $TARGET.bak
-		  echo "!${TARGET#*'/system/'}" >> $INSTALLEDFILESINFO 
-		  echo "${TARGET#*'/system/'}.bak" >> $INSTALLEDFILESINFO 
+		  log_installed "$TARGET" "/system/" '!' ''
+		  log_installed "$TARGET" "/system/" '' '.bak'
         done
 	  } || {
 		ui_print "- Removing (permanently) files"
         for TARGET in $REPLACE; do
           rm -rf $TARGET
-		  echo "!${TARGET#*'/system/'}" >> $INSTALLEDFILESINFO 
+		  log_installed "$TARGET" "/system/" '!' ''
         done
 	  }
 	fi
@@ -192,7 +196,7 @@ install_system() {
 	  rm $INSTALLER/system/placeholder 2>/dev/null
 	  cp -af $INSTALLER/system/* /system
 	  for i in $(find $INSTALLER/system -type f); do
-	    echo "${i#*"$INSTALLER/system/"}" >> $INSTALLEDFILESINFO
+	    log_installed "$i" "$INSTALLER/system/" '' ''
 	  done
 	fi
 	
@@ -208,7 +212,7 @@ install_system() {
           done
 	      echo "" >> $INITPATH/${MODID}-prop.sh
 	      set_perm $INITPATH/${MODID}-prop.sh 0 0 0700 
-		  echo "${INITPATH#*'/system/'}${MODID}-prop.sh" >> $INSTALLEDFILESINFO
+		  log_installed "$INITPATH" '/system/' '' "${MODID}-prop.sh"
 	    else
 	      ui_print "! No proper directory to put scripts (prop)"
 	    fi
@@ -228,7 +232,7 @@ install_system() {
 	    ui_print "- Copying post-fs-data script (${MODID-1}.sh) to $INITPATH"
 	    cp -af $INSTALLER/common/post-fs-data.sh $INITPATH/${MODID}-1.sh
 	    set_perm $INITPATH/${MODID}-1.sh 0 0 0700
-		echo "${INITPATH#*'/system/'}${MODID}-1.sh" >> $INSTALLEDFILESINFO
+		log_installed "$INITPATH" '/system/' '' "${MODID}-1.sh"
 	  fi
 	else
 	  ui_print "! No proper directory to put scripts (post-fs-data)"
@@ -242,7 +246,7 @@ install_system() {
 	    ui_print "- Copying late_start service script (${MODID}-2.sh) to $INITPATH"
 	    cp -af $INSTALLER/common/service.sh $INITPATH/${MODID}-2.sh
 	    set_perm $INITPATH/${MODID}-2.sh 0 0 0700
-		echo "${INITPATH#*'/system/'}${MODID}-2.sh" >> $INSTALLEDFILESINFO
+		log_installed "$INITPATH" '/system/' '' "${MODID}-2.sh"
 	  fi
 	else
 	  ui_print "! No proper directory to put scripts (service)"
