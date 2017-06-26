@@ -328,10 +328,34 @@ source config.sh
 
 INSTALLER=$TMPDIR/$MODID
 MODPATH=$MOUNTPATH/$MODID
+PERM=rw
 
 mkdir -p $INSTALLER
 cd $INSTALLER
 unzip -o "$ZIP" "common/*" module.prop
+
+##########################################################################################
+# Main
+##########################################################################################
+
+# Print mod name
+print_modname
+
+# Please leave this message in your flashable zip for credits :)
+ui_print "******************************"
+ui_print "System/Less Install  (@veez21)"
+ui_print "******************************"
+
+ui_print "- Mounting /system($PERM), /vendor($PERM), /data, /cache"
+mount -o $PERM /system 2>/dev/null
+mount -o $PERM /vendor 2>/dev/null
+mount /data 2>/dev/null
+mount /cache 2>/dev/null
+
+if [ ! -f '/system/build.prop' ]; then
+  ui_print "! Failed: /system could not be mounted!"
+  exit 1
+fi
 
 # Fix variable conflicts/errors
 [ -z $SYSTEMINSTALL ] && [ -z $MAGISKINSTALL ] && {
@@ -347,50 +371,16 @@ unzip -o "$ZIP" "common/*" module.prop
   ! $MAGISKINSTALL && ! $SYSTEMINSTALL && SYSTEMINSTALL=true && PERM=rw
 }
 
-if [ $MAGISKINSTALL ] && $MAGISKINSTALL && [ -z $SYSTEMINSTALL ]; then
-  PERM=ro
-  MAGISKINSTALL=true
-  SYSTEMINSTALL=false
-fi
-if [ $SYSTEMINSTALL ] && [ -z $MAGISKINSTALL ] && $SYSTEMINSTALL; then
-  PERM=rw
-  MAGISKINSTALL=false
-  SYSTEMINSTALL=true
-fi
-
 $MAGISKINSTALL && SYSTEMINSTALL=false && PERM=ro
 $SYSTEMINSTALL && MAGISKINSTALL=false && PERM=rw
 [ ! $PERM ] && PERM=rw
 [ ! $PERMANENTDELETE ] && PERMANENTDELETE=false
 [ ! $ERROREXIT ] && ERROREXIT=true
 
-##########################################################################################
-# Main
-##########################################################################################
-
-# Print mod name
-print_modname
-
-# Please leave this message in your flashable zip for credits :)
-ui_print "******************************"
-ui_print "System/Less Install  (@veez21)"
-ui_print "******************************"
-
 if ($MAGISKINSTALL) && (! $SYSTEMINSTALL); then
-  ui_print " - Magisk/Systemless Install"
+  ui_print "- Magisk/Systemless Install"
 elif ($SYSTEMINSTALL) && (! $MAGISKINSTALL); then
-  ui_print " - System Install"
-fi
-
-ui_print "- Mounting /system($PERM), /vendor($PERM), /data, /cache"
-mount -o $PERM /system 2>/dev/null
-mount -o $PERM /vendor 2>/dev/null
-mount /data 2>/dev/null
-mount /cache 2>/dev/null
-
-if [ ! -f '/system/build.prop' ]; then
-  ui_print "! Failed: /system could not be mounted!"
-  exit 1
+  ui_print "- System Install"
 fi
 
 API=`grep_prop ro.build.version.sdk`
